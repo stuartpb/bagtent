@@ -1,0 +1,28 @@
+#! /usr/bin/env bash
+
+mkuuid () {
+  od -x /dev/urandom | head -1 | awk '{
+    OFS="-"; sub(/./,"4",$5); srand($6);
+    sub(/./,substr("89ab",rand()*4,1),$6); print $2$3,$4,$5,$6,$7$8$9}'
+}
+
+if [[ -d content ]]; then
+  root=content/
+fi
+
+gitmode=$(git rev-parse --is-inside-work-tree 2>/dev/null)
+
+if [[ $# == 0 ]]; then
+  echo "Usage: mkdir content && bagtent-destructure [^A-Z]*.md" >&2
+fi
+
+for file in "$@"; do
+  newname=$(mkuuid).md
+  echo "- [$file][]" >> LIST.md
+  echo "[$file]: $root$newname" >> LINKS.md
+  if [[ -n "$gitmode" ]]; then
+    git mv "$file" "$root$newname"
+  else
+    mv "$file" "$root$newname"
+  fi
+done

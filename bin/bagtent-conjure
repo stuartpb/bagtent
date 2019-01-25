@@ -1,0 +1,16 @@
+#!/bin/sh
+mkuuid () {
+  od -x /dev/urandom | head -1 | awk '{
+    OFS="-"; sub(/./,"4",$5); srand($6);
+    sub(/./,substr("89ab",rand()*4,1),$6); print $2$3,$4,$5,$6,$7$8$9}'
+}
+
+uuid=$(mkuuid)
+
+if [ -z "${PWD%%*/content}" ]; then
+  touch "$uuid.md" && echo "$uuid.md"
+elif [ -d content ]; then
+  touch "content/$uuid.md" && echo "content/$uuid.md"
+else
+  echo "content directory not found" >&2 && exit 1
+fi
