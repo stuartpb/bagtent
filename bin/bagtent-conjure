@@ -8,9 +8,21 @@ mkuuid () {
 uuid=$(mkuuid)
 
 if [ -z "${PWD%%*/content}" ]; then
-  touch "$uuid.md" && echo "$uuid.md"
+  filepath="$uuid.md"
 elif [ -d content ]; then
-  touch "content/$uuid.md" && echo "content/$uuid.md"
+  filepath="content/$uuid.md"
 else
-  echo "content directory not found" >&2 && exit 1
+  echo "content directory not found" >&2
+  exit 1
 fi
+
+if [ "--open" = "$1" ]; then
+  if [ -z "$EDITOR" ]; then
+    EDITOR=nano
+  fi
+  $EDITOR "$filepath"
+else
+  touch "$filepath"
+fi
+
+echo "$uuid.md"
