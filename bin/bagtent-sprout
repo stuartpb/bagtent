@@ -1,0 +1,15 @@
+## TODO: Enter new symbolic name (default will be first 4 bytes of new UUID)
+## TODO: Enter initial content for file (default: heading with symbolic name)
+## TODO: Enter file to add (presumably its first) reference to
+## TODO: If not a UUID
+ ## TODO: find the most likely UUID the input text could refer to
+## TODO: Print the first line of the file being appended to for safety's sake
+## TODO: If no existing references to the named new symbol
+  ## TODO: enter line adding reference to this file
+## TODO: If no links on the line
+  ## TODO: append it to the end of the line
+## TODO: Make the new file (with heading) and open it in $EDITOR (defaulting to `echo`?)
+## TODO: Add entered line after last line in file that isn't blank or a link reference (after inserting a blank line if run with -p)
+## TODO: If the line adds a list item (and -p is not set)
+  ## TODO: add it to the last list of that type where the last item contained a link
+## TODO: Add link reference with symbol to end of file (or populate existing unfinished reference)

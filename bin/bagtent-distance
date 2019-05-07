@@ -1,0 +1,25 @@
+#! /usr/bin/env bash
+
+# actually, this might have to be Node, or at least Lua because it could use a set for marking traversed nodes
+
+# prints the minimum distance of all subsequent named files by links from the first one
+# usage: bagtent-distance README.md content/*
+# exits with min(number of unreachable files, 127)
+# -q suppresses output, making this just a test if all files are reachable
+
+# I think the above sounds a little bit too much like orphans
+# maybe what I really want is like a "graph statistics" tool that can list all inbound links, list all their degrees from README/whatever origin, list which is closest, etc
+
+# the real purpose of this is to see what I might have, for instance, accidentally clipped off from "regular traffic", even if not outright orphaned, or what I might have inadvertently "shorted" and exposed to undesired attention by linking on a page that's not buried deep enough
+
+# so yeah, now that I think about it this should do a breadth-first listing of all nodes, not listing already-traversed nodes, and listing their degree like that
+
+# maybe each travsersal starts with "XYZ.md @ 0", where each new degree increments the number, and of course the filename is which file's links are being listed
+
+# this can then be used to detect unreachable cycles by seeing what wasn't reached in the BFS
+
+# if you add a command line option for "print every "
+
+# all these comment scripts should really just be moved to barfspace until I write them
+
+# and moving them and writing them should both be quest items on the barfspace arc (the latter is really a quest wuth each script a subitem)

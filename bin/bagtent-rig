@@ -1,0 +1,32 @@
+#! /usr/bin/env node
+
+// this needs strong markdown parsing because otherwise code blocks
+// with regex containing adjacent character classes will trip it up
+
+// bagtent-rig -q just tests if there are unresolved links to rig
+
+// mocked-out procedure from earlier Bash draft:
+
+// TODO: Find first line in file matching \[[^]]\]\[([^]])\]
+// where there is no line matching '^\[\1\]:'
+// (where '\1' is the capture, or the first part if the capture was empty)
+
+// specifically make sure every match on every line is checked, in order,
+// as a line can contain multiple named links
+
+// TODO: while there's a dangling link ref
+
+// TODO: get top-links results for grep -i `printf '\\b%s.*' \1`
+// (except the "\1" is the match from the grep)
+// and to be honest, I don't actually think I'll need the \b part in practice
+
+// TODO: if there are top links prompt for which top-link I wish to append
+// (by number, "Y" being number 1), or if I want to [N]ot (ie. skip), or
+// [A]bort the process
+
+// If I pick a top-link, first replace the part that was matched as \1 in the
+// beginning, so long as that line is still present in the file exactly as
+// written - if it isn't, re-find the line by searching for the first dangling
+// reference not yet skipped (in skip order), and if the match isn't identical
+// to what it is here, prompt for [R]etry, [N]ot doing this line (skip), or
+// [A]borting again.
