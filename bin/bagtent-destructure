@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+DESTRUCTURE_MODE=list
+
 mkuuid () {
   od -x /dev/urandom | head -1 | awk '{
     OFS="-"; sub(/./,"4",$5); srand($6);
@@ -7,7 +9,15 @@ mkuuid () {
 }
 
 if [[ -d content ]]; then
-  root=content/
+  pathroot=content/
+fi
+
+# TODO: Set this for comparison if an output filename is specified
+# (this will make more sense in a future iteration of this script)
+DESTRUCTURE_LEVEL=content
+
+if [[ $DESTRUCTURE_LEVEL != content ]]; then
+  linkroot=$pathroot
 fi
 
 gitmode=$(git rev-parse --is-inside-work-tree 2>/dev/null)
@@ -18,11 +28,15 @@ fi
 
 for file in "$@"; do
   newname=$(mkuuid).md
-  echo "- [$file][]" >> LIST.md
-  echo "[$file]: $root$newname" >> LINKS.md
-  if [[ -n "$gitmode" ]]; then
-    git mv "$file" "$root$newname"
+  if [[ $DESTRUCTURE_MODE == map ]]; then
+    echo "- [$file][]" >> LIST.md
+    echo "[$file]: $linkroot$newname" >> LINKS.md
   else
-    mv "$file" "$root$newname"
+    echo "- [$file]($linkroot$newname)" >> LIST.md
+  fi
+  if [[ -n "$gitmode" ]]; then
+    git mv "$file" "$pathroot$newname"
+  else
+    mv "$file" "$pathroot$newname"
   fi
 done
