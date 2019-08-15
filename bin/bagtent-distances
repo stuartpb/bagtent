@@ -8,6 +8,8 @@ const parser = require('unified')()
   .use(require('remark-parse'))
   // Makes traversal easier and (correctly) ignores unused definitions
   .use(require('remark-inline-links'))
+  // Give us the raw AST when processing
+  .use(function(){this.Compiler = x=>x})
   .freeze();
 
 const rootFile = path.relative('', process.argv[2]);
@@ -22,7 +24,7 @@ const exploreFile = level => file => {
   // (which could, theoretically, have resolved before this one)
   if (distances.get(path.relative('', file.path)) == level - 1)
     // Review all links in the file
-    visit(parser().parse(file), 'link', link => {
+    visit(parser().processSync(file).contents, 'link', link => {
 
     // ignore fragids and/or query strings
     let href = link.url.replace(/[#?].*$/, '');
