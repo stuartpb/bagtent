@@ -38,9 +38,9 @@ const exploreFile = level => file => {
       // If we haven't explored the linked file,
       if (!distances.has(href) || (
         // or we need to re-evaluate its distances at a shorter depth
-        // (which is *unlikely*, considering that we're opening breadth-first,
-        // but not impossible, since deeper files can theoretically open
-        // faster than shallower ones)
+        // (which is *unlikely*, considering that we're opening
+        // breadth-first, but not impossible, since deeper files can
+        // theoretically finish opening earlier than shallower ones)
         distances.get(href) > level && !reachOnly)) {
 
         // Record that the file is at this distance
@@ -49,9 +49,12 @@ const exploreFile = level => file => {
         // Add it to the stack
         pending.push(readFile(href).then(
           exploreFile(level + 1),
-          // if there's an error opening the file,
-          // we'll log it and continue
-          console.error));
+          err => {
+            if (err.code == 'ENOENT') {
+              console.error(`${path.relative('', file.path)} line ${
+                link.position.start.line}: file not found: ${href}`);
+            } else throw err;
+          }));
       }
     }
   });
@@ -75,4 +78,5 @@ function summarize() {
 // Start parsing from the root file
 readFile(rootFile).then(exploreFile(1), console.error)
   // Once all files have been parsed, display summary
-  .then(summarize);
+  .then(summarize)
+  .catch(console.error);
