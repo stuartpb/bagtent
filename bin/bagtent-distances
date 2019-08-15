@@ -1,0 +1,78 @@
+#! /usr/bin/env node
+const readFile = require('to-vfile').read;
+const isURL = require('valid-url').isUri;
+const visit = require('unist-util-visit');
+const path = require('path');
+
+const parser = require('unified')()
+  .use(require('remark-parse'))
+  // Makes traversal easier and (correctly) ignores unused definitions
+  .use(require('remark-inline-links'))
+  // Give us the raw AST when processing
+  .use(function(){this.Compiler = x=>x})
+  .freeze();
+
+const rootFile = path.relative('', process.argv[2]);
+const reachOnly = process.argv.indexOf('--reachable') > -1;
+const distances = new Map([[rootFile, 0]]);
+
+// level: what distance this file's children would be at.
+const exploreFile = level => file => {
+  const pending = [];
+
+  // if a shorter path to this file than this invocation hasn't been found
+  // (which could, theoretically, have resolved before this one)
+  if (distances.get(path.relative('', file.path)) == level - 1)
+    // Review all links in the file
+    visit(parser().processSync(file).contents, 'link', link => {
+
+    // ignore fragids and/or query strings
+    let href = link.url.replace(/[#?].*$/, '');
+
+    // only operate on non-URLs (filenames)
+    if (href && !isURL(href)) {
+
+      // rewrite to be relative to cwd
+      href = path.relative('', path.resolve(path.dirname(file.path), href));
+
+      // If we haven't explored the linked file,
+      if (!distances.has(href) || (
+        // or we need to re-evaluate its distances at a shorter depth
+        // (which is *unlikely*, considering that we're opening breadth-first,
+        // but not impossible, since deeper files can theoretically open
+        // faster than shallower ones)
+        distances.get(href) > level && !reachOnly)) {
+
+        // Record that the file is at this distance
+        distances.set(href, level);
+
+        // Add it to the stack
+        pending.push(readFile(href).then(
+          exploreFile(level + 1),
+          // if there's an error opening the file,
+          // we'll log it and continue
+          console.error));
+      }
+    }
+  });
+
+  return Promise.all(pending);
+}
+
+function summarize() {
+  const paths = [...distances.keys()].sort();
+  if (reachOnly) {
+    for (let path of paths) {
+      console.log(path);
+    }
+  } else {
+    for (let path of paths) {
+      console.log(path, distances.get(path));
+    }
+  }
+}
+
+// Start parsing from the root file
+readFile(rootFile).then(exploreFile(1), console.error)
+  // Once all files have been parsed, display summary
+  .then(summarize);
