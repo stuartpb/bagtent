@@ -1,0 +1,27 @@
+{
+  "name": "bagtent",
+  "version": "0.1.0",
+  "description": "A spec for repositories of loosely-structured content, and tools for working with it",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stuartpb/bagtent.git"
+  },
+  "author": "Stuart P. Bentley <s@stuartpb.com> (https://stuartpb.com/)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/stuartpb/bagtent/issues"
+  },
+  "homepage": "https://github.com/stuartpb/bagtent#readme",
+  "dependencies": {
+    "is-url-superb": "^3.0.0",
+    "remark-inline-links": "^3.1.3",
+    "remark-parse": "^7.0.1",
+    "to-vfile": "^6.0.0",
+    "unified": "^8.3.2",
+    "unist-util-visit": "^2.0.0"
+  }
+}
