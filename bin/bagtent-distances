@@ -49,10 +49,19 @@ const exploreFile = level => file => {
         // Add it to the stack
         pending.push(readFile(href).then(
           exploreFile(level + 1),
+
           err => {
+            // If the file doesn't exist
             if (err.code == 'ENOENT') {
+
+              // alert the user
               console.error(`${path.relative('', file.path)} line ${
                 link.position.start.line}: file not found: ${href}`);
+
+              // forget the distance record
+              distances.delete(href);
+
+            // Kick any other error up to halt
             } else throw err;
           }));
       }
