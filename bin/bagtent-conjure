@@ -2,15 +2,22 @@
 mkuuid () {
   od -x /dev/urandom | head -1 | awk '{
     OFS="-"; sub(/./,"4",$5); srand($6);
-    sub(/./,substr("89ab",rand()*4,1),$6); print $2$3,$4,$5,$6,$7$8$9}'
+    sub(/./,substr("89ab",rand()*4,1),$6);
+    print $2$3,$4,$5,$6,$7$8$9}'
 }
 
-uuid=$(mkuuid)
+if [ -f ./.bagtentrc ]; then
+  . ./.bagtentrc
+elif [ -f ../.bagtentrc ]; then
+  . ../.bagtentrc
+fi
+
+name=$(${BAGTENT_NAMEGEN:=mkuuid})
 
 if [ -z "${PWD%%*/content}" ]; then
-  filepath="$uuid.md"
+  filepath="$name.md"
 elif [ -d content ]; then
-  filepath="content/$uuid.md"
+  filepath="content/$name.md"
 else
   echo "content directory not found" >&2
   exit 1
@@ -25,4 +32,4 @@ else
   touch "$filepath"
 fi
 
-echo "$uuid.md"
+echo "$name.md"

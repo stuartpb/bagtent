@@ -3,8 +3,15 @@
 mkuuid () {
   od -x /dev/urandom | head -1 | awk '{
     OFS="-"; sub(/./,"4",$5); srand($6);
-    sub(/./,substr("89ab",rand()*4,1),$6); print $2$3,$4,$5,$6,$7$8$9}'
+    sub(/./,substr("89ab",rand()*4,1),$6);
+    print $2$3,$4,$5,$6,$7$8$9}'
 }
+
+if [ -f ./.bagtentrc ]; then
+  . ./.bagtentrc
+elif [ -f ../.bagtentrc ]; then
+  . ../.bagtentrc
+fi
 
 if [[ -d content ]]; then
   root=content/
@@ -17,7 +24,7 @@ if [[ $# == 0 ]]; then
 fi
 
 for file in "$@"; do
-  newname=$(mkuuid).md
+  newname=$(${BAGTENT_NAMEGEN:=mkuuid}).md
   echo "- [$file][]" >> LIST.md
   echo "[$file]: $root$newname" >> LINKS.md
   if [[ -n "$gitmode" ]]; then
