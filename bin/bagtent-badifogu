@@ -1,0 +1,54 @@
+#! /usr/bin/env node
+
+"use strict";
+
+const con = "bdfghjklmnprstvz"
+const vo = "aiou";
+
+function rc(s) {
+  return s[Math.floor(Math.random()*s.length)];
+}
+
+function randomBadifogu() {
+  return rc(con) + rc(vo) + rc(con) + rc(vo) +
+    rc(con) + rc(vo) + rc(con) + rc(vo) +
+    '-' + rc(con) + rc(vo) + rc(con) + rc(vo) + rc(con) +
+    '-' + rc(con) + rc(vo) + rc(con) + rc(vo) + rc(con) +
+    '-' + rc(con) + rc(vo) + rc(con) + rc(vo) +
+    rc(con) + rc(vo) + rc(con) + rc(vo);
+}
+
+function hexAt(s,b,e){
+  return parseInt(s.slice(b,e),16);
+}
+
+function convertHex(hex){
+  let i = 0;
+  let buf = '';
+  while (i < hex.length) {
+    if (i % 3 == 0) {
+      buf += con[hexAt(hex,i,i+1)];
+      i += 1;
+    } else {
+      buf += vo[hexAt(hex,i,i+1) >> 2] +
+        con[hexAt(hex,i,i+2) >> 2 & 15] +
+        vo[hexAt(hex,i+1,i+2) & 3];
+      i += 2;
+    }
+  }
+  return buf;
+}
+
+function uuidToBadifogu(uuid) {
+  return convertHex(uuid.slice(24,30)) + '-' +
+    convertHex(uuid.slice(0,4)) + '-' +
+    convertHex(uuid.slice(4,8)) + '-' +
+    convertHex(uuid.slice(30,36));
+}
+
+if (!process.argv[2] || process.argv[2] == '--random'){
+  console.log(randomBadifogu());
+} else if (process.argv[2] == '--from-uuid') {
+  // TODO: allow "--from-uuid=" notation
+  console.log(uuidToBadifogu(process.argv[3]));
+} // TODO: implicit "from-uuid", batching, non-UUID conversion
