@@ -17,12 +17,12 @@ else
   exit 1
 fi
 
-if [ "--open" = "$1" ]; then
+if [ "--edit" = "$1" ]; then
   if [ -z "$EDITOR" ]; then
     EDITOR=nano
   fi
   $EDITOR "$filepath"
-else
+elif [ "--touch" = "$1" ]; then
   touch "$filepath"
 fi
 
