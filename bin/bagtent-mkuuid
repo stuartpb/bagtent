@@ -1,0 +1,68 @@
+#! /bin/sh
+
+devrandom_uuid () {
+    hd4=0-9a-f0-9a-f0-9a-f0-9a-f
+    hd16=$hd4$hd4$hd4$hd4
+    vd4=89ab89ab89ab89ab
+    vd16=$vd4$vd4$vd4$vd4
+    vd64=$vd16$vd16$vd16$vd16
+    eight=$(tr '\0-\399' $hd16 < "$1" | dd bs=8 count=1 2> /dev/null)
+    four=$(tr '\0-\399' $hd16 < "$1" | dd bs=4 count=1 2> /dev/null)
+    three1=$(tr '\0-\399' $hd16 < "$1"| dd bs=3 count=1 2> /dev/null)
+    variant=$(tr '\0-\399' $vd64 < "$1" | dd bs=1 count=1 2> /dev/null)
+    three2=$(tr '\0-\399' $hd16 < "$1" | dd bs=3 count=1 2> /dev/null)
+    twelve=$(tr '\0-\399' $hd16 < "$1" | dd bs=12 count=1 2> /dev/null)
+
+    printf "${eight}-${four}-4${three1}-${variant}${three2}-${twelve}"
+}
+
+bash_uuid() {
+  exec bash -c '
+    local N B C="89ab"
+
+    for (( N=0; N < 16; ++N ))
+    do
+        B=$(( $RANDOM%256 ))
+
+        case $N in
+            6)
+                printf "4%x" $(( B%16 ))
+                ;;
+            8)
+                printf "%c%x" ${C:$RANDOM%${#C}:1} $(( B%16 ))
+                ;;
+            3 | 5 | 7 | 9)
+                printf "%02x-" $B
+                ;;
+            *)
+                printf "%02x" $B
+                ;;
+        esac
+    done
+
+    echo'
+}
+
+awk_mkuuid () {
+  # XXX: if /dev/urandom were okay, we wouldn't get here
+  od -x /dev/urandom | head -1 | awk '{
+    OFS="-"; sub(/./,"4",$5); srand($6);
+    sub(/./,substr("89ab",rand()*4+1,1),$6);
+    print $2$3,$4,$5,$6,$7$8$9}'
+}
+
+if [ -f /proc/sys/kernel/random/uuid ]; then
+  exec cat /proc/sys/kernel/random/uuid
+elif [ -f /compat/linux/proc/sys/kernel/random/uuid ]; then
+  exec cat /compat/linux/proc/sys/kernel/random/uuid
+elif [ -f /dev/urandom ]; then
+  devrandom_uuid /dev/urandom
+elif [ -f /dev/random ]; then
+  devrandom_uuid /dev/urandom
+elif command -v mkuuid >/dev/null 2>&1; then
+  exec mkuuid
+elif command -v bash >/dev/null 2>&1; then
+  bash_mkuuid
+else
+  awk_mkuuid
+fi
